@@ -1,11 +1,35 @@
 <gconfschemafile>
 	<schemalist>
 		<schema>
+			<key>/schemas/system/tvout_enable</key>
+			<applyto>/system/tvout_enable</applyto>
+			<owner>tvout</owner>
+			<type>bool</type>
+			<default>1</default>
+			<locale name="C"/>
+		</schema>
+		<schema>
 			<key>/schemas/system/tvout</key>
 			<applyto>/system/tvout</applyto>
 			<owner>tvout</owner>
 			<type>string</type>
 			<default>PAL</default>
+			<locale name="C"/>
+		</schema>
+		<schema>
+			<key>/schemas/system/aspectratio</key>
+			<applyto>/system/aspectratio</applyto>
+			<owner>tvout</owner>
+			<type>string</type>
+			<default>NORMAL</default>
+			<locale name="C"/>
+		</schema>
+		<schema>
+			<key>/schemas/system/tvout_scale</key>
+			<applyto>/system/tvout_scale</applyto>
+			<owner>tvout</owner>
+			<type>int</type>
+			<default>90</default>
 			<locale name="C"/>
 		</schema>
 	</schemalist>
