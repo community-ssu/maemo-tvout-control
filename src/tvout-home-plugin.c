@@ -1,6 +1,7 @@
 /*
  * Maemo TV out control home plugin
  * Copyright (C) 2010-2011  Ville Syrjälä <syrjala@sci.fi>
+ * Copyright (C) 2011       Pali Rohár <pali.rohar@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,9 +19,10 @@
  */
 
 #include <hildon/hildon.h>
+#include <gconf/gconf-client.h>
 
 #include "tvout-home-plugin.h"
-#include "tvout-ctl.h"
+#include "tvout_gconf_keys.h"
 
 HD_DEFINE_PLUGIN_MODULE (TVoutHomePlugin, tvout_home_plugin, HD_TYPE_HOME_PLUGIN_ITEM)
 
@@ -29,7 +31,11 @@ HD_DEFINE_PLUGIN_MODULE (TVoutHomePlugin, tvout_home_plugin, HD_TYPE_HOME_PLUGIN
 
 struct _TVoutHomePluginPrivate
 {
-  TVoutCtl *tvout_ctl;
+  GConfClient *gconf_client;
+  guint gconf_enable;
+  guint gconf_tv_std;
+  guint gconf_aspect;
+  guint gconf_scale;
 
   GtkWidget *enable_button;
   GtkWidget *tv_std_button;
@@ -38,11 +44,10 @@ struct _TVoutHomePluginPrivate
   GtkWidget *scale_inc_button;
   GtkWidget *scale_label;
 
-  GIOChannel *io;
   guint watch;
 };
 
-void tvout_ui_set_enable (gpointer data, gint value)
+static void tvout_ui_set_enable (gpointer data, gint value)
 {
   static const gchar *labels[] = {
     "OFF",
@@ -56,7 +61,7 @@ void tvout_ui_set_enable (gpointer data, gint value)
   gtk_button_set_label (GTK_BUTTON (priv->enable_button), labels[value]);
 }
 
-void tvout_ui_set_tv_std (gpointer data, gint value)
+static void tvout_ui_set_tv_std (gpointer data, gint value)
 {
   static const gchar *labels[] = {
     "PAL",
@@ -70,7 +75,7 @@ void tvout_ui_set_tv_std (gpointer data, gint value)
   gtk_button_set_label (GTK_BUTTON (priv->tv_std_button), labels[value]);
 }
 
-void tvout_ui_set_aspect (gpointer data, gint value)
+static void tvout_ui_set_aspect (gpointer data, gint value)
 {
   static const gchar *labels[] = {
     "4:3",
@@ -84,7 +89,7 @@ void tvout_ui_set_aspect (gpointer data, gint value)
   gtk_button_set_label (GTK_BUTTON (priv->aspect_button), labels[value]);
 }
 
-void tvout_ui_set_scale (gpointer data, gint value)
+static void tvout_ui_set_scale (gpointer data, gint value)
 {
   TVoutHomePluginPrivate *priv = data;
   gchar text[4];
@@ -99,12 +104,27 @@ void tvout_ui_set_scale (gpointer data, gint value)
   gtk_widget_set_sensitive (priv->scale_inc_button, value < 100);
 }
 
+static void tvout_ui_update (GConfClient *client G_GNUC_UNUSED, guint cnxn_id G_GNUC_UNUSED, GConfEntry *entry, gpointer data)
+{
+  const char *key = gconf_entry_get_key (entry);
+  GConfValue *value = gconf_entry_get_value (entry);
+
+  if (strcmp (key, TVOUT_GCONF_ENABLE_KEY) == 0)
+    tvout_ui_set_enable (data, gconf_value_get_bool (value));
+  else if (strcmp (key, TVOUT_GCONF_TV_STD_KEY) == 0)
+    tvout_ui_set_tv_std (data, strcmp (gconf_value_get_string (value), "PAL") == 0 ? 0 : 1);
+  else if (strcmp(key, TVOUT_GCONF_ASPECT_KEY) == 0)
+    tvout_ui_set_aspect (data, strcmp (gconf_value_get_string (value), "NORMAL") == 0 ? 0 : 1);
+  else if (strcmp(key, TVOUT_GCONF_SCALE_KEY) == 0)
+    tvout_ui_set_scale (data, gconf_value_get_int (value));
+}
+
 static void enable_button_clicked (GtkButton *widget,
                                    gpointer user_data)
 {
   TVoutHomePluginPrivate *priv = user_data;
 
-  tvout_ctl_set_enable (priv->tvout_ctl, !tvout_ctl_get_enable (priv->tvout_ctl));
+  gconf_client_set_bool (priv->gconf_client, TVOUT_GCONF_ENABLE_KEY, !gconf_client_get_bool (priv->gconf_client, TVOUT_GCONF_ENABLE_KEY, NULL), NULL);
 }
 
 static void tv_std_button_clicked (GtkButton *widget,
@@ -112,7 +132,7 @@ static void tv_std_button_clicked (GtkButton *widget,
 {
   TVoutHomePluginPrivate *priv = user_data;
 
-  tvout_ctl_set_tv_std (priv->tvout_ctl, !tvout_ctl_get_tv_std (priv->tvout_ctl));
+  gconf_client_set_string (priv->gconf_client, TVOUT_GCONF_TV_STD_KEY, strcmp(gconf_client_get_string (priv->gconf_client, TVOUT_GCONF_TV_STD_KEY, NULL), "PAL") == 0 ? "NTSC" : "PAL", NULL);
 }
 
 static void aspect_button_clicked (GtkButton *widget,
@@ -120,7 +140,7 @@ static void aspect_button_clicked (GtkButton *widget,
 {
   TVoutHomePluginPrivate *priv = user_data;
 
-  tvout_ctl_set_aspect (priv->tvout_ctl, !tvout_ctl_get_aspect (priv->tvout_ctl));
+  gconf_client_set_string (priv->gconf_client, TVOUT_GCONF_ASPECT_KEY, strcmp(gconf_client_get_string (priv->gconf_client, TVOUT_GCONF_ASPECT_KEY, NULL), "NORMAL") == 0 ? "WIDE" : "NORMAL", NULL);
 }
 
 static void scale_dec_button_clicked (GtkButton *widget,
@@ -129,11 +149,11 @@ static void scale_dec_button_clicked (GtkButton *widget,
   TVoutHomePluginPrivate *priv = user_data;
   int value;
 
-  value = tvout_ctl_get_scale (priv->tvout_ctl) - 1;
+  value = gconf_client_get_int (priv->gconf_client, TVOUT_GCONF_SCALE_KEY, NULL) - 1;
   if (value < 1 || value > 100)
     return;
 
-  tvout_ctl_set_scale (priv->tvout_ctl, value);
+  gconf_client_set_int (priv->gconf_client, TVOUT_GCONF_SCALE_KEY, value, NULL);
 }
 
 static void scale_inc_button_clicked (GtkButton *widget,
@@ -142,11 +162,11 @@ static void scale_inc_button_clicked (GtkButton *widget,
   TVoutHomePluginPrivate *priv = user_data;
   int value;
 
-  value = tvout_ctl_get_scale (priv->tvout_ctl) + 1;
+  value = gconf_client_get_int (priv->gconf_client, TVOUT_GCONF_SCALE_KEY, NULL) + 1;
   if (value < 1 || value > 100)
     return;
 
-  tvout_ctl_set_scale (priv->tvout_ctl, value);
+  gconf_client_set_int (priv->gconf_client, TVOUT_GCONF_SCALE_KEY, value, NULL);
 }
 
 static GtkWidget *create_ui_enable (TVoutHomePluginPrivate *priv)
@@ -163,7 +183,7 @@ static GtkWidget *create_ui_enable (TVoutHomePluginPrivate *priv)
   gtk_button_set_label (GTK_BUTTON (button), "OFF");
   gtk_button_set_label (GTK_BUTTON (button), "ON");
 
-  tvout_ui_set_enable (priv, tvout_ctl_get_enable (priv->tvout_ctl));
+  tvout_ui_set_enable (priv, gconf_client_get_bool (priv->gconf_client, TVOUT_GCONF_ENABLE_KEY, NULL));
 
   g_signal_connect (G_OBJECT (button), "clicked",
                     G_CALLBACK (enable_button_clicked), priv);
@@ -187,7 +207,7 @@ static GtkWidget *create_ui_tv_std (TVoutHomePluginPrivate *priv)
   gtk_button_set_label (GTK_BUTTON (button), "PAL");
   gtk_button_set_label (GTK_BUTTON (button), "NTSC");
 
-  tvout_ui_set_tv_std (priv, tvout_ctl_get_tv_std (priv->tvout_ctl));
+  tvout_ui_set_tv_std (priv, strcmp(gconf_client_get_string (priv->gconf_client, TVOUT_GCONF_TV_STD_KEY, NULL), "PAL") == 0 ? 0 : 1);
 
   g_signal_connect (G_OBJECT (button), "clicked",
                     G_CALLBACK (tv_std_button_clicked), priv);
@@ -211,7 +231,7 @@ static GtkWidget *create_ui_aspect (TVoutHomePluginPrivate *priv)
   gtk_button_set_label (GTK_BUTTON (button), "4:3");
   gtk_button_set_label (GTK_BUTTON (button), "16:9");
 
-  tvout_ui_set_aspect (priv, tvout_ctl_get_aspect (priv->tvout_ctl));
+  tvout_ui_set_aspect (priv, strcmp(gconf_client_get_string (priv->gconf_client, TVOUT_GCONF_ASPECT_KEY, NULL), "NORMAL") == 0 ? 0 : 1);
 
   g_signal_connect (G_OBJECT (button), "clicked",
                     G_CALLBACK (aspect_button_clicked), priv);
@@ -236,7 +256,7 @@ static GtkWidget *create_ui_scale (TVoutHomePluginPrivate *priv)
   gtk_box_pack_start_defaults (GTK_BOX (hbox), button);
 
   priv->scale_label = label = gtk_label_new ("0");
-  tvout_ui_set_scale (priv, tvout_ctl_get_scale (priv->tvout_ctl));
+  tvout_ui_set_scale (priv, gconf_client_get_int (priv->gconf_client, TVOUT_GCONF_SCALE_KEY, NULL));
   gtk_box_pack_start_defaults (GTK_BOX (hbox), label);
 
   priv->scale_inc_button = button = gtk_button_new_with_label (">");
@@ -269,58 +289,6 @@ static GtkWidget *create_ui (TVoutHomePlugin *self)
   return vbox;
 }
 
-static gboolean tvout_io_func (GIOChannel *source,
-			       GIOCondition condition,
-			       gpointer data)
-{
-  TVoutHomePluginPrivate *priv = data;
-
-  tvout_ctl_fd_ready (priv->tvout_ctl);
-
-  return TRUE;
-}
-
-static void create_io_channel (TVoutHomePluginPrivate *priv)
-{
-  GIOStatus s;
-  int fd = tvout_ctl_fd (priv->tvout_ctl);
-
-  if (fd < 0)
-    return;
-
-  priv->io = g_io_channel_unix_new (fd);
-  if (!priv->io)
-    return;
-
-  s = g_io_channel_set_encoding (priv->io, NULL, NULL);
-  if (s != G_IO_STATUS_NORMAL) {
-    g_io_channel_unref (priv->io);
-    priv->io = NULL;
-    return;
-  }
-
-  g_io_channel_set_buffered (priv->io, FALSE);
-
-  priv->watch = g_io_add_watch (priv->io, G_IO_IN | G_IO_PRI, tvout_io_func, priv);
-  if (!priv->watch) {
-    g_io_channel_unref (priv->io);
-    priv->io = NULL;
-    return;
-  }
-}
-
-static void destroy_io_channel (TVoutHomePluginPrivate *priv)
-{
-  if (priv->watch) {
-    g_source_remove (priv->watch);
-    priv->watch = 0;
-  }
-  if (priv->io) {
-    g_io_channel_unref (priv->io);
-    priv->io = NULL;
-  }
-}
-
 static void
 tvout_home_plugin_init (TVoutHomePlugin *self)
 {
@@ -329,14 +297,18 @@ tvout_home_plugin_init (TVoutHomePlugin *self)
 
   self->priv = priv = TVOUT_HOME_PLUGIN_GET_PRIVATE (self);
 
-  priv->tvout_ctl = tvout_ctl_init (priv);
+  priv->gconf_client = gconf_client_get_default ();
 
-  create_io_channel (priv);
+  if (!priv->gconf_client)
+    return;
+
+  gconf_client_add_dir (priv->gconf_client, TVOUT_GCONF_PATH, GCONF_CLIENT_PRELOAD_NONE, NULL);
+  priv->gconf_enable = gconf_client_notify_add (priv->gconf_client, TVOUT_GCONF_ENABLE_KEY, (GConfClientNotifyFunc)tvout_ui_update, priv, NULL, NULL);
+  priv->gconf_tv_std = gconf_client_notify_add (priv->gconf_client, TVOUT_GCONF_TV_STD_KEY, (GConfClientNotifyFunc)tvout_ui_update, priv, NULL, NULL);
+  priv->gconf_aspect = gconf_client_notify_add (priv->gconf_client, TVOUT_GCONF_ASPECT_KEY, (GConfClientNotifyFunc)tvout_ui_update, priv, NULL, NULL);
+  priv->gconf_scale = gconf_client_notify_add (priv->gconf_client, TVOUT_GCONF_SCALE_KEY, (GConfClientNotifyFunc)tvout_ui_update, priv, NULL, NULL);
 
   contents = create_ui (self);
-
-  if (!priv->tvout_ctl)
-    gtk_widget_set_sensitive (contents, FALSE);
 
   gtk_widget_show_all (contents);
 
@@ -347,9 +319,25 @@ static void tvout_home_plugin_finalize (GObject *self)
 {
   TVoutHomePluginPrivate *priv = TVOUT_HOME_PLUGIN (self)->priv;
 
-  destroy_io_channel (priv);
+  if (priv->gconf_client) {
 
-  tvout_ctl_exit (priv->tvout_ctl);
+    if (priv->gconf_enable)
+      gconf_client_notify_remove (priv->gconf_client, priv->gconf_enable);
+
+    if (priv->gconf_tv_std)
+      gconf_client_notify_remove (priv->gconf_client, priv->gconf_tv_std);
+
+    if (priv->gconf_aspect)
+      gconf_client_notify_remove (priv->gconf_client, priv->gconf_aspect);
+
+    if (priv->gconf_scale)
+      gconf_client_notify_remove (priv->gconf_client, priv->gconf_scale);
+
+    gconf_client_remove_dir (priv->gconf_client, TVOUT_GCONF_PATH, NULL);
+    gconf_client_clear_cache (priv->gconf_client);
+    g_object_unref (priv->gconf_client);
+
+  }
 
   G_OBJECT_CLASS (tvout_home_plugin_parent_class)->finalize (self);
 }
