@@ -1,6 +1,7 @@
 /*
  * Maemo TV out control
  * Copyright (C) 2010-2011  Ville Syrjälä <syrjala@sci.fi>
+ * Copyright (C) 2011       Pali rohár <pali.rohar@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -27,14 +28,6 @@
 
 #include "tvout-ctl.h"
 
-enum {
-  ATTR_ENABLE,
-  ATTR_TV_STD,
-  ATTR_ASPECT,
-  ATTR_SCALE,
-  NUM_ATTRS,
-};
-
 static const char *atom_names[NUM_ATTRS] = {
   [ATTR_ENABLE] = "XV_OMAP_CLONE_TO_TVOUT",
   [ATTR_TV_STD] = "XV_OMAP_TVOUT_STANDARD",
@@ -48,7 +41,8 @@ struct _TVoutCtl {
   int event_base;
   Atom atoms[NUM_ATTRS];
   int values[NUM_ATTRS];
-  void *ui_data;
+  void *user_data;
+  void (*update_attr)(int, int, void *);
 };
 
 static bool xv_init (TVoutCtl *ctl)
@@ -134,24 +128,6 @@ static void xv_exit (TVoutCtl *ctl)
   XCloseDisplay (ctl->dpy);
 }
 
-static void update_ui (TVoutCtl *ctl, int attr_idx, int value)
-{
-  switch (attr_idx) {
-  case ATTR_ENABLE:
-    tvout_ui_set_enable (ctl->ui_data, value);
-    break;
-  case ATTR_TV_STD:
-    tvout_ui_set_tv_std (ctl->ui_data, value);
-    break;
-  case ATTR_ASPECT:
-    tvout_ui_set_aspect (ctl->ui_data, value);
-    break;
-  case ATTR_SCALE:
-    tvout_ui_set_scale (ctl->ui_data, value);
-    break;
-  }
-}
-
 union xeu {
   XEvent event;
   XvPortNotifyEvent port_notify_event;
@@ -194,7 +170,7 @@ static void xv_io_func (TVoutCtl *ctl)
         break;
 
       ctl->values[attr_idx] = value;
-      update_ui (ctl, attr_idx, ctl->values[attr_idx]);
+      ctl->update_attr(attr_idx, ctl->values[attr_idx], ctl->user_data);
       break;
     }
   }
@@ -236,7 +212,7 @@ static bool xv_update_attributes (TVoutCtl *ctl)
   return true;
 }
 
-TVoutCtl *tvout_ctl_init (void *ui_data)
+TVoutCtl *tvout_ctl_init (void *user_data, void (*update_attr)(int, int, void *))
 {
   TVoutCtl *ctl;
 
@@ -262,7 +238,8 @@ TVoutCtl *tvout_ctl_init (void *ui_data)
     return NULL;
   }
 
-  ctl->ui_data = ui_data;
+  ctl->user_data = user_data;
+  ctl->update_attr = update_attr;
 
   return ctl;
 }

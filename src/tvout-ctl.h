@@ -1,6 +1,7 @@
 /*
  * Maemo TV out control
  * Copyright (C) 2010-2011  Ville Syrjälä <syrjala@sci.fi>
+ * Copyright (C) 2011       Pali Rohár  <pali.rohar@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,9 +25,17 @@
 extern "C" {
 #endif
 
+enum {
+  ATTR_ENABLE,
+  ATTR_TV_STD,
+  ATTR_ASPECT,
+  ATTR_SCALE,
+  NUM_ATTRS,
+};
+
 typedef struct _TVoutCtl TVoutCtl;
 
-TVoutCtl *tvout_ctl_init (void *ui_data);
+TVoutCtl *tvout_ctl_init (void *user_data, void (*update_attr)(int, int, void *));
 void tvout_ctl_exit (TVoutCtl *ctl);
 
 int tvout_ctl_fd (TVoutCtl *ctl);
@@ -41,11 +50,6 @@ int tvout_ctl_get_enable (TVoutCtl *ctl);
 int tvout_ctl_get_tv_std (TVoutCtl *ctl);
 int tvout_ctl_get_aspect (TVoutCtl *ctl);
 int tvout_ctl_get_scale (TVoutCtl *ctl);
-
-void tvout_ui_set_enable (void *ui_data, int value);
-void tvout_ui_set_tv_std (void *ui_data, int value);
-void tvout_ui_set_aspect (void *ui_data, int value);
-void tvout_ui_set_scale (void *ui_data, int value);
 
 #ifdef __cplusplus
 }
