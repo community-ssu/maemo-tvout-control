@@ -1,26 +1,43 @@
-#                                               -*- Autoconf -*-
-# Process this file with autoconf to produce a configure script.
-
-AC_PREREQ([2.60])
-AC_INIT([tvout-home-plugin], [2], [])
-AM_INIT_AUTOMAKE([])
-AC_CONFIG_SRCDIR([src/tvout-home-plugin.c])
+AC_PREREQ([2.61])
+AC_INIT([maemo-applet-tvout], [2.0])
+AC_CONFIG_SRCDIR([src])
 AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_HEADERS([config.h])
+AM_INIT_AUTOMAKE
 
 AC_PROG_CC
+AC_HEADER_STDC
 AC_DISABLE_STATIC
-AC_PROG_LIBTOOL
+AC_PROG_INSTALL
+AM_PROG_LIBTOOL
 
-PKG_CHECK_MODULES([HILDON],[libhildondesktop-1])
-PKG_CHECK_MODULES([XV],[x11 xv])
+PKG_CHECK_MODULES(HILDON, libhildondesktop-1 libosso gconf-2.0 x11 xv)
+PKG_CHECK_MODULES(OSSO, libosso)
+PKG_CHECK_MODULES(X11, x11)
+PKG_CHECK_MODULES(XV, xv)
 
-homedesktopdir=`$PKG_CONFIG --variable=hildonhomedesktopentrydir libhildondesktop-1`
-AC_SUBST(homedesktopdir)
+HILDON_CFLAGS+="$OSSO_CFLAGS $X11_CFLAGS $XV_CFLAGS"
+HILDON_LIBS+="$OSSO_LIBS $X11_LIBS $XV_LIBS"
 
-homeplugindir=`$PKG_CONFIG --variable=hildondesktoplibdir libhildondesktop-1`
-AC_SUBST(homeplugindir)
+AC_SUBST(HILDON_CFLAGS)
+AC_SUBST(HILDON_LIBS)
 
-AC_CONFIG_FILES([Makefile
-                 src/Makefile])
-AC_OUTPUT
+PKG_CHECK_MODULES(CONTROLPANEL, hildon-control-panel)
+AC_SUBST(CONTROLPANEL_CFLAGS)
+AC_SUBST(CONTROLPANEL_LIBS)
+
+CONTROLPANEL_ENTRY_DIR=`$PKG_CONFIG --variable=plugindesktopentrydir hildon-control-panel`
+AC_SUBST(CONTROLPANEL_ENTRY_DIR)
+
+CONTROLPANEL_LIB_DIR=`$PKG_CONFIG --variable=pluginlibdir hildon-control-panel`
+AC_SUBST(CONTROLPANEL_LIB_DIR)
+
+HILDON_HOME_ENTRY_DIR=`$PKG_CONFIG --variable=hildonhomedesktopentrydir libhildondesktop-1`
+AC_SUBST(HILDON_HOME_ENTRY_DIR)
+
+HILDON_MENU_ENTRY_DIR=`$PKG_CONFIG --variable=hildonstatusmenudesktopentrydir libhildondesktop-1`
+AC_SUBST(HILDON_MENU_ENTRY_DIR)
+
+HILDON_LIB_DIR=`$PKG_CONFIG --variable=hildondesktoplibdir libhildondesktop-1`
+AC_SUBST(HILDON_LIB_DIR)
+
+AC_OUTPUT(Makefile data/Makefile src/Makefile)
