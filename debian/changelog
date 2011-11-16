@@ -1,10 +1,10 @@
-maemo-applet-tvout (2.0) unstable; urgency=low
+maemo-tvout-control (2.0) fremantle; urgency=low
 
   * New open source clone of control panel applet maemo-applet-tvout
   * New status menu applet status-menu-applet-tvout (it handle all gconf key changes)
   * Fixed maemo-tvout-control to use only gconf keys
 
- -- Pali Rohár <pali.rohar@gmail.com>  Sat, 01 Oct 2011 15:07:10 +0200
+ -- Pali Rohár <pali.rohar@gmail.com>  Wed, 16 Nov 2011 20:12:03 +0100
 
 maemo-tvout-control (2) fremantle; urgency=low
 

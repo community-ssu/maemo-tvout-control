@@ -1,15 +1,15 @@
-statusmenudir = @prefix@/${HILDON_MENU_ENTRY_DIR}
+hildon_statusmenudir = @prefix@/${HILDON_MENU_ENTRY_DIR}
 
-statusmenu_DATA = tvout_status_menu_item.desktop
+hildon_statusmenu_DATA = tvout_status_menu_item.desktop
 
-homeplugindir = @prefix@/${HILDON_HOME_ENTRY_DIR}
+hildon_desktopdir = @prefix@/${HILDON_DESKTOP_ENTRY_DIR}
 
-homeplugin_DATA = tvout-home-plugin.desktop
+hildon_desktop_DATA = tvout-home-plugin.desktop
 
-controlpaneldir = @prefix@/${CONTROLPANEL_ENTRY_DIR}
+hildon_controlpaneldir = @prefix@/${HILDON_CONTROLPANEL_ENTRY_DIR}
 
-controlpanel_DATA = cptvout.desktop
+hildon_controlpanel_DATA = cptvout.desktop
 
-schemasdir = @prefix@/share/gconf/schemas
+gconf_schemasdir = @prefix@/share/gconf/schemas
 
-schemas_DATA = tvout.schemas
+gconf_schemas_DATA = tvout.schemas

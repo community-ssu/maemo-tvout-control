@@ -53,7 +53,7 @@ static void update(GObject * object, gpointer user_data G_GNUC_UNUSED) {
 
 }
 
-osso_return_t execute(osso_context_t * osso, gpointer user_data G_GNUC_UNUSED, gboolean user_activated G_GNUC_UNUSED) {
+osso_return_t execute(osso_context_t * osso G_GNUC_UNUSED, gpointer user_data G_GNUC_UNUSED, gboolean user_activated G_GNUC_UNUSED) {
 
 	GdkGeometry geometry;
 	GtkWidget * dialog;

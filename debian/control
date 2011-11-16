@@ -1,14 +1,9 @@
-Source: maemo-applet-tvout
+Source: maemo-tvout-control
 Section: libs
 Priority: optional
 Maintainer: Pali Rohár <pali.rohar@gmail.com>
-Build-Depends: debhelper (>= 5), autotools-dev, libosso-dev, libgconf2-dev, hildon-control-panel-dev, libhildondesktop1-dev, libxv-dev
-
-Package: maemo-applet-tvout
-Architecture: any
-Depends: osso-tv-out-l10n-mr0 | osso-tv-out-l10n-mr, hildon-libs-l10n-mr | hildon-libs-l10n-mr0, status-menu-applet-tvout, ${shlibs:Depends}, ${misc:Depends}
-Description: TV-Out control panel applet
- This package contains the control panel applet for controlling TV-Out.
+Build-Depends: debhelper (>= 5), autotools-dev, libosso-dev, libgconf2-dev,
+ libhal-dev, hildon-control-panel-dev, libhildondesktop1-dev, libx11-dev, libxv-dev
 
 Package: status-menu-applet-tvout
 Architecture: any
@@ -18,6 +13,13 @@ Depends: maemo-applet-tvout, hildon-libs-l10n-mr | hildon-libs-l10n-mr0, ${shlib
 Description: TV-Out status menu applet
  This package contains the status menu applet for controlling TV-Out.
 
+Package: maemo-applet-tvout
+Architecture: any
+Depends: osso-tv-out-l10n-mr0 | osso-tv-out-l10n-mr, hildon-libs-l10n-mr | hildon-libs-l10n-mr0,
+ status-menu-applet-tvout, ${shlibs:Depends}, ${misc:Depends}
+Description: TV-Out control panel applet
+ This package contains the control panel applet for controlling TV-Out.
+
 Package: maemo-tvout-control
 Section: user/desktop
 Architecture: any
@@ -26,9 +28,7 @@ XB-Maemo-Display-Name: TV out control desktop widget
 Description: Set the aspect ratio and scaling of the N900's TV out
  This desktop applet allows you to control different parameters
  of the N900's TV out (enable/disable, PAL/NTSC, aspect ratio
- and scaling factor) that are not available in the control panel.
- .
- The widget was developed by Ville Syrjälä <syrjala@sci.fi>.
+ and scaling factor)
 XSBC-Maemo-Icon-26:
  iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAGXRFWHRTb2Z0
  d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAx5JREFUeNrsmd9r2lAUx+9N
