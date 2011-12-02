@@ -69,20 +69,25 @@ static void tvout_status_menu_item_update_button(LibHalContext * ctx, const char
 
 	types = libhal_device_get_property_strlist(plugin->priv->ctx, HAL_JACK_UDI, HAL_JACK_KEY_TYPE, NULL);
 
-	if ( ! types || ! types[0] )
+	if ( ! types )
 		return;
 
-	if ( strcmp(types[0], "videoout") == 0 ) {
+	while ( *types ) {
 
-		enable = gconf_client_get_bool(plugin->priv->gconf_client, TVOUT_GCONF_ENABLE_KEY, NULL);
-		hildon_button_set_value(HILDON_BUTTON(plugin->priv->button), enable ? "Output enabled" : "Output disabled"); /* TODO: dgettext */
-		gtk_widget_show_all(GTK_WIDGET(plugin));
+		if ( strncmp(*types, "video", strlen("video")) == 0 ) {
 
-	} else {
+			enable = gconf_client_get_bool(plugin->priv->gconf_client, TVOUT_GCONF_ENABLE_KEY, NULL);
+			hildon_button_set_value(HILDON_BUTTON(plugin->priv->button), enable ? "Output enabled" : "Output disabled"); /* TODO: dgettext */
+			gtk_widget_show_all(GTK_WIDGET(plugin));
+			return;
 
-		gtk_widget_hide(GTK_WIDGET(plugin));
+		}
+
+		++types;
 
 	}
+
+	gtk_widget_hide(GTK_WIDGET(plugin));
 
 }
 
