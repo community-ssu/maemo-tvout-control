@@ -1,5 +1,5 @@
 AC_PREREQ([2.61])
-AC_INIT([maemo-tvout-control], [2.0])
+AC_INIT([maemo-tvout-control], [3.0])
 AC_CONFIG_SRCDIR([src])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE

@@ -43,6 +43,7 @@ struct _TVoutCtl {
   int values[NUM_ATTRS];
   void *user_data;
   void (*update_attr)(int, int, void *);
+  bool inited;
 };
 
 static bool xv_init (TVoutCtl *ctl)
@@ -170,7 +171,10 @@ static void xv_io_func (TVoutCtl *ctl)
         break;
 
       ctl->values[attr_idx] = value;
-      ctl->update_attr(attr_idx, ctl->values[attr_idx], ctl->user_data);
+
+      if (ctl->inited)
+        ctl->update_attr(attr_idx, ctl->values[attr_idx], ctl->user_data);
+
       break;
     }
   }
@@ -220,6 +224,8 @@ TVoutCtl *tvout_ctl_init (void *user_data, void (*update_attr)(int, int, void *)
   if (!ctl)
     return NULL;
 
+  ctl->inited = false;
+
   if (!xv_init (ctl)) {
     free (ctl);
     return NULL;
@@ -238,8 +244,11 @@ TVoutCtl *tvout_ctl_init (void *user_data, void (*update_attr)(int, int, void *)
     return NULL;
   }
 
+  xv_io_func (ctl);
+
   ctl->user_data = user_data;
   ctl->update_attr = update_attr;
+  ctl->inited = true;
 
   return ctl;
 }
