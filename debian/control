@@ -2,7 +2,7 @@ Source: maemo-tvout-control
 Section: user/desktop
 Priority: extra
 Maintainer: Thomas Perl <m@thp.io>
-Build-Depends: debhelper (>= 5), autotools-dev, libxv-dev, libhildondesktop1-dev
+Build-Depends: debhelper (>= 5), autotools-dev, libtvout-ctl-dev, libhildondesktop1-dev
 Standards-Version: 3.7.2
 XSBC-Bugtracker: http://talk.maemo.org/showthread.php?t=68294
 
