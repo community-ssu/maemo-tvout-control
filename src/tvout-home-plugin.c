@@ -19,8 +19,9 @@
 
 #include <hildon/hildon.h>
 
+#include <tvout-ctl.h>
+
 #include "tvout-home-plugin.h"
-#include "tvout-ctl.h"
 
 HD_DEFINE_PLUGIN_MODULE (TVoutHomePlugin, tvout_home_plugin, HD_TYPE_HOME_PLUGIN_ITEM)
 

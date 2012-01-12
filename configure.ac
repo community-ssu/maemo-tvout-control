@@ -15,7 +15,7 @@ AC_DISABLE_STATIC
 AC_PROG_LIBTOOL
 
 PKG_CHECK_MODULES([HILDON],[libhildondesktop-1])
-PKG_CHECK_MODULES([XV],[x11 xv])
+PKG_CHECK_MODULES([TVOUT_CTL],[tvout-ctl])
 
 homedesktopdir=`$PKG_CONFIG --variable=hildonhomedesktopentrydir libhildondesktop-1`
 AC_SUBST(homedesktopdir)

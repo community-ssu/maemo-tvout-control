@@ -5,11 +5,11 @@ homeplugin_LTLIBRARIES = \
 
 tvout_home_plugin_la_CFLAGS = \
 	@HILDON_CFLAGS@ \
-	@XV_CFLAGS@
+	@TVOUT_CTL_CFLAGS@
 
 tvout_home_plugin_la_LIBADD = \
 	@HILDON_LIBS@ \
-	@XV_LIBS@
+	@TVOUT_CTL_LIBS@
 
 tvout_home_plugin_la_LDFLAGS = \
 	-avoid-version \
@@ -17,7 +17,5 @@ tvout_home_plugin_la_LDFLAGS = \
 	-shared
 
 tvout_home_plugin_la_SOURCES = \
-	tvout-ctl.c \
-	tvout-ctl.h \
 	tvout-home-plugin.c \
 	tvout-home-plugin.h
