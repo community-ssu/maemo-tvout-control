@@ -1,3 +1,9 @@
+maemo-tvout-control (5) fremantle; urgency=low
+
+  * Use libtvout-ctl
+
+ -- Ville Syrjala <syrjala@sci.fi>  Thu, 12 Jan 2012 08:29:14 +0200
+
 maemo-tvout-control (4) fremantle; urgency=low
 
   * TVoutCtl API change
