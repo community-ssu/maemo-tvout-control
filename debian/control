@@ -1,22 +1,38 @@
 Source: maemo-tvout-control
 Section: user/desktop
 Priority: extra
-Maintainer: Thomas Perl <m@thp.io>
-Build-Depends: debhelper (>= 5), autotools-dev, libtvout-ctl-dev, libhildondesktop1-dev
+Maintainer: Pali Rohár <pali.rohar@gmail.com>
+Build-Depends: debhelper (>= 5), autotools-dev, libtvout-ctl-dev,
+	       libgconf2-dev, libhal-dev, hildon-control-panel-dev,
+	       libhildondesktop1-dev, libosso-dev
 Standards-Version: 3.7.2
-XSBC-Bugtracker: http://talk.maemo.org/showthread.php?t=68294
+
+Package: status-menu-applet-tvout
+Architecture: any
+Conflicts: maemo-applet-tvout (<< 2)
+Replaces: maemo-applet-tvout (<< 2)
+Depends: maemo-applet-tvout, hildon-libs-l10n-mr | hildon-libs-l10n-mr0, ${shlibs:Depends}, ${misc:Depends}
+Description: TV-Out status menu applet
+ This package contains the status menu applet for controlling TV-Out.
+
+Package: maemo-applet-tvout
+Architecture: any
+Depends: osso-tv-out-l10n-mr0 | osso-tv-out-l10n-mr, hildon-libs-l10n-mr | hildon-libs-l10n-mr0,
+ status-menu-applet-tvout, ${shlibs:Depends}, ${misc:Depends}
+Description: TV-Out control panel applet
+ This package contains the control panel applet for controlling TV-Out.
 
 Package: maemo-tvout-control
+Section: user/desktop
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: status-menu-applet-tvout, ${shlibs:Depends}, ${misc:Depends}
 XB-Maemo-Display-Name: TV out control desktop widget
 Description: Set the aspect ratio and scaling of the N900's TV out
  This desktop applet allows you to control different parameters
  of the N900's TV out (enable/disable, PAL/NTSC, aspect ratio
- and scaling factor) that are not available in the control panel.
- .
- The widget was developed by Ville Syrjälä <syrjala@sci.fi>.
-XSBC-Maemo-Icon-26: iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAGXRFWHRTb2Z0
+ and scaling factor)
+XSBC-Maemo-Icon-26:
+ iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAGXRFWHRTb2Z0
  d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAx5JREFUeNrsmd9r2lAUx+9N
  tLAxUfew2lHGYKAvw5eCg71M8MF/RPYn7GF/wB72DwjDV/8In+YYDDbwYbJu
  qFTrdNradtW2RquJ2bmpN2ZZbMwPo7IcOGiCST/fe37ckxSLoog22Ri04eYK
@@ -37,4 +53,3 @@ XSBC-Maemo-Icon-26: iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAGXRFWHRTb2Z0
  eaFOq1ED6t/cmdbEc3CnNgQyP3wC/0ImGfWUYFSAlJLg2w53zmPwntaYc6uA
  TTP3PzSuAFeAK2C19keAAQCO3xW+//ne4wAAAABJRU5ErkJggg==
  ====
-

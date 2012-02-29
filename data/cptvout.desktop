@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Name=tvou_ap_cpa
+Comment=Set the tv-out settings.
+Type=HildonControlPanelPlugin
+Icon=control_tv_out
+Categories=General
+X-control-panel-plugin=libcptvout.so
+X-Text-Domain=osso-tv-out

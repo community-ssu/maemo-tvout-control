@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=TV out
+Comment=TV out Status Menu Item
+Category=permanent
+Type=default
+X-Path=libtvout_status_menu_item.so

@@ -24,9 +24,12 @@ else
 	CFLAGS += -O2
 endif
 
+configure:
+	autoreconf --force --install
+
 config.status: configure
 	dh_testdir
-	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
+	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info --with-gconf-schema-file-dir=\$${prefix}/share/gconf/schemas CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
 
 
 build: build-stamp
@@ -54,13 +57,14 @@ install: build
 	dh_testroot
 	dh_clean -k
 	dh_installdirs
-	$(MAKE) DESTDIR=$(CURDIR)/debian/maemo-tvout-control install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
 
 binary-indep: build install
 
 binary-arch: build install
 	dh_testdir
 	dh_testroot
+	dh_install --sourcedir=debian/tmp
 	dh_installchangelogs
 	dh_installdocs
 	dh_installexamples
