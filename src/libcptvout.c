@@ -108,6 +108,9 @@ osso_return_t execute(osso_context_t * osso G_GNUC_UNUSED, gpointer user_data G_
 	else
 		aspect = 0;
 
+	g_free(str_aspect);
+	g_free(str_tv_std);
+
 	gtk_button_set_label(GTK_BUTTON(button_enable), "Enable"); /* TODO: dgettext */
 	gtk_button_set_alignment(GTK_BUTTON(button_enable), 0, 0.5);
 	hildon_check_button_set_active(HILDON_CHECK_BUTTON(button_enable), enable);

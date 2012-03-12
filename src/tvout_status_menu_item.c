@@ -216,6 +216,7 @@ static void tvout_status_menu_item_destroy_io_channel(TVoutStatusMenuItem * plug
 static void tvout_status_menu_item_init(TVoutStatusMenuItem * plugin) {
 
 	DBusError error;
+	char *str;
 
 	plugin->priv = TVOUT_STATUS_MENU_ITEM_GET_PRIVATE(plugin);
 
@@ -280,8 +281,14 @@ static void tvout_status_menu_item_init(TVoutStatusMenuItem * plugin) {
 	plugin->priv->gconf_scale = gconf_client_notify_add(plugin->priv->gconf_client, TVOUT_GCONF_SCALE_KEY, tvout_status_menu_item_update_tvout, plugin, NULL, NULL);
 
 	tvout_ctl_set(plugin->priv->tvout_ctl, TVOUT_CTL_ENABLE, gconf_client_get_bool(plugin->priv->gconf_client, TVOUT_GCONF_ENABLE_KEY, NULL));
-	/* tvout_ctl_set_tv_std(plugin->priv->tvout_ctl, strcmp(gconf_client_get_string(plugin->priv->gconf_client, TVOUT_GCONF_TV_STD_KEY, NULL), "PAL") == 0 ? 0 : 1); */
-	tvout_ctl_set(plugin->priv->tvout_ctl, TVOUT_CTL_ASPECT, strcmp(gconf_client_get_string(plugin->priv->gconf_client, TVOUT_GCONF_ASPECT_KEY, NULL), "NORMAL") == 0 ? 0 : 1);
+#if 0
+	str = gconf_client_get_string(plugin->priv->gconf_client, TVOUT_GCONF_TV_STD_KEY, NULL);
+	tvout_ctl_set_tv_std(plugin->priv->tvout_ctl, strcmp(str, "PAL") == 0 ? 0 : 1);
+	g_free(str);
+#endif
+	str = gconf_client_get_string(plugin->priv->gconf_client, TVOUT_GCONF_ASPECT_KEY, NULL);
+	tvout_ctl_set(plugin->priv->tvout_ctl, TVOUT_CTL_ASPECT, strcmp(str, "NORMAL") == 0 ? 0 : 1);
+	g_free(str);
 	tvout_ctl_set(plugin->priv->tvout_ctl, TVOUT_CTL_SCALE, gconf_client_get_int(plugin->priv->gconf_client, TVOUT_GCONF_SCALE_KEY, NULL));
 
 	tvout_status_menu_item_update_button(plugin->priv->ctx, HAL_JACK_UDI, HAL_JACK_KEY_TYPE, FALSE, FALSE);
