@@ -1,3 +1,9 @@
+maemo-tvout-control (6) fremantle; urgency=low
+
+  * Merge with CSSU version
+
+ -- Ville Syrjälä <syrjala@sci.fi>  Mon, 12 Mar 2012 03:05:30 +0200
+
 maemo-tvout-control (5) fremantle; urgency=low
 
   * Use libtvout-ctl
