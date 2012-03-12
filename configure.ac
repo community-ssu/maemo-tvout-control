@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.60])
-AC_INIT([maemo-tvout-control], [5], [])
+AC_INIT([maemo-tvout-control], [6], [])
 AM_INIT_AUTOMAKE([])
 AC_CONFIG_SRCDIR([src/tvout-home-plugin.c])
 AC_CONFIG_MACRO_DIR([m4])
