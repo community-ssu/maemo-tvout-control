@@ -1,3 +1,9 @@
+maemo-tvout-control (6.0-0+0cssu0) fremantle; urgency=low
+
+  * Follow CSSU versioning
+
+ -- Mohammad Abu-Garbeyyeh <¤mohammad7410@gmail.com>  Sat, 07 Apr 201218:16:08 +0300
+
 maemo-tvout-control (6) fremantle; urgency=low
 
   * Merge with CSSU version
