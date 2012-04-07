@@ -1,5 +1,5 @@
 Source: maemo-tvout-control
-Section: user/desktop
+Section: libs
 Priority: extra
 Maintainer: Pali Rohár <pali.rohar@gmail.com>
 Build-Depends: debhelper (>= 5), autotools-dev, libtvout-ctl-dev,
